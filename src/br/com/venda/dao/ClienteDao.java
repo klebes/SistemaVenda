@@ -20,12 +20,15 @@ import javax.swing.JOptionPane;
  * @author KDS
  */
 public class ClienteDao {
+
     private Connection con;
-    public ClienteDao(){
+
+    public ClienteDao() {
         this.con = new ConectorFactory().getConnection();
     }
+
     //metodo cadastrar cliente
-    public void cadastrarCliente(Cliente clienteobj){
+    public void cadastrarCliente(Cliente clienteobj) {
         try {
             //comando sql
             String sql = "insert into tb_clientes(nome, rg,cpf,email,telefone,celular,cep,endereco, numero, complemento, bairro, cidade, estado)"
@@ -45,37 +48,79 @@ public class ClienteDao {
             stmt.setString(11, clienteobj.getBairro());
             stmt.setString(12, clienteobj.getCidade());
             stmt.setString(13, clienteobj.getEstado());
-            
+
             //executar o comando sql
             stmt.execute();
             //fechar o comando sql
             stmt.close();
-            
+
             JOptionPane.showMessageDialog(null, "Cliente Cadastrado com sucesso!");
-     
+
         } catch (SQLException error) {
             JOptionPane.showMessageDialog(null, "Erro ao cadastrar cliente" + error);
         }
     }
+
     //metodo alterar cliente
-    public void alterarCliente(){
-        
+    public void alterarCliente(Cliente clienteobj) {
+        try {
+//            criando o comando sql
+            String sql = "update tb_clientes set nome = ?, rg = ?, cpf = ? ,email = ?, telefone = ?, celular = ?, cep = ?, endereco = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ? where id =?";
+            //conectando ao banco de dados e passar os campos sql
+            PreparedStatement stmt = con.prepareCall(sql);
+
+            stmt.setString(1, clienteobj.getNome());
+            stmt.setString(2, clienteobj.getRg());
+            stmt.setString(3, clienteobj.getCpf());
+            stmt.setString(4, clienteobj.getEmail());
+            stmt.setString(5, clienteobj.getTelefone());
+            stmt.setString(6, clienteobj.getCelular());
+            stmt.setString(7, clienteobj.getCep());
+            stmt.setString(8, clienteobj.getEndereco());
+            stmt.setInt(9, clienteobj.getNumero());
+            stmt.setString(10, clienteobj.getComplemento());
+            stmt.setString(11, clienteobj.getBairro());
+            stmt.setString(12, clienteobj.getCidade());
+            stmt.setString(13, clienteobj.getEstado());
+            stmt.setInt(14, clienteobj.getId());
+// executar o comando sql
+            stmt.execute();
+            stmt.close();
+            JOptionPane.showMessageDialog(null, "Cliente alterado com sucesso!");
+        } catch (Exception error) {
+            JOptionPane.showMessageDialog(null, "Error + " + error);
+        }
     }
+
     //metodo excluir cliente
-    public void excluirCliente(){
-        
+    public void excluirCliente(Cliente clienteobj) {
+        try {
+//            criando o comando sql
+            String sql = "delete from tb_clientes where id =?";
+//            conectando ao bando de dados 
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setInt(1, clienteobj.getId());
+//            executando o sql
+            stmt.execute();
+            stmt.close();
+            JOptionPane.showMessageDialog(null, "Usuario deletado com sucesso!");
+
+        } catch (Exception error) {
+            JOptionPane.showMessageDialog(null, "Error + !" + error);
+        }
     }
-    //metodo listar clietne
-    public List<Cliente> listarCliente(){
+
+    //metodo listar cliente
+    public List<Cliente> listarCliente() {
         try {
             //criacao da lista
             List<Cliente> lista = new ArrayList<>();
             //sql listar
             String sql = "select * from tb_clientes";
-            PreparedStatement stmt = con.prepareCall(sql);
+            PreparedStatement stmt = con.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
-            
-            while(rs.next()){
+
+            while (rs.next()) {
                 Cliente clienteobj = new Cliente();
                 clienteobj.setId(rs.getInt("id"));
                 clienteobj.setNome(rs.getString("nome"));
@@ -91,7 +136,7 @@ public class ClienteDao {
                 clienteobj.setBairro(rs.getString("bairro"));
                 clienteobj.setCidade(rs.getString("cidade"));
                 clienteobj.setEstado(rs.getString("estado"));
-                
+
                 lista.add(clienteobj);
 
             }
@@ -101,4 +146,41 @@ public class ClienteDao {
             return null;
         }
     }
-}
+//    buscar cliente por nome
+    public List<Cliente>buscarClientePorNome(String nome){
+        try {
+            //criar a lista de cliente
+            List<Cliente> listaCliente = new ArrayList<>();
+            //  listar apartir do sql
+            String sql = "select * from tb_clientes where nome like?";
+            //criar o sql de consulta
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setString(1, nome);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Cliente clienteobj = new Cliente();
+                clienteobj.setId(rs.getInt("id"));
+                clienteobj.setNome(rs.getString("nome"));
+                clienteobj.setRg(rs.getString("rg"));
+                clienteobj.setCpf(rs.getString("cpf"));
+                clienteobj.setEmail(rs.getString("email"));
+                clienteobj.setTelefone(rs.getString("telefone"));
+                clienteobj.setCelular(rs.getString("celular"));
+                clienteobj.setCep(rs.getString("cep"));
+                clienteobj.setEndereco(rs.getString("endereco"));
+                clienteobj.setNumero(rs.getInt("numero"));
+                clienteobj.setComplemento(rs.getString("complemento"));
+                clienteobj.setBairro(rs.getString("bairro"));
+                clienteobj.setCidade(rs.getString("cidade"));
+                clienteobj.setEstado(rs.getString("estado"));
+
+                listaCliente.add(clienteobj);
+            }
+                return listaCliente;
+        } catch (Exception e) {
+                return null;
+                }
+        }
+    }
+
